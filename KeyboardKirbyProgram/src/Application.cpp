@@ -7,12 +7,11 @@ const float Application::kZoomSpeed = 0.1f;
 Application::Application(sf::VideoMode video_mode, const char* title)
 	: render_window_(video_mode, title)
 	, world_view_()
-	, gui_view_height_(1000.0f)
 	, starting_height_(video_mode.height)
 	, mouse_dragging_(false)
 	, windmill_(click_sound_buffer_)
   , msg_shape_({ 400, 300 })
-  , hoverbox_shape_({ 50, 50 })
+  , hoverbox_shape_({ 30, 30 })
   , msg_shown_(false)
 	, clock_()
 	, dt_(0.f)
@@ -66,8 +65,8 @@ inline void Application::UpdateViews()
 	world_view_.setSize((float)(starting_height_ * render_window_.getSize().x / render_window_.getSize().y),
 			(float)(starting_height_));
 	gui_view_.setSize(
-      (float)(gui_view_height_ * render_window_.getSize().x / render_window_.getSize().y),
-      (float)(gui_view_height_));
+      (float)(starting_height_ * render_window_.getSize().x / render_window_.getSize().y),
+      (float)(starting_height_));
   gui_view_.setCenter(gui_view_.getSize() / 2.0f);
 }
 
@@ -145,7 +144,7 @@ void Application::PollEvents()
             sf::Mouse::getPosition(render_window_), 
             gui_view_);
 
-        msg_shown_ = mp.x < 60 && mp.x >= -20 && mp.y < 60 && mp.y >= -20;
+        msg_shown_ = mp.x < 50 && mp.x >= 0 && mp.y < 50 && mp.y >= 0;
 
       }
 		}

@@ -13,7 +13,6 @@ private:
 private:
 	sf::RenderWindow render_window_;
 	sf::View world_view_;
-	float gui_view_height_;
 	sf::View gui_view_;
 	
 	unsigned starting_height_;
