@@ -3,4 +3,6 @@ An interactive program that demonstrates the Windmill problem on the 2011 IMO, a
 
 [This 3Blue1Brown video](https://youtu.be/M64HUIJFTZM) served as inspiration for this project and brilliantly explains the problem and solution.
 
+---
+
 The box in the upper lefthand corner will display all keybinds when the cursor is over it.
