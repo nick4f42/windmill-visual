@@ -1,4 +1,5 @@
 #pragma once
+
 #define _USE_MATH_DEFINES
 
 #include <vector>
@@ -35,9 +36,6 @@ private:
 	Point previous_pivot_;
 	double rad_since_pivot_;
 
-	sf::Vertex line_vertex_array_[2];
-
-
 	double current_rad_;
 	double rads_per_second_;
 
@@ -46,6 +44,8 @@ private:
 	sf::CircleShape pt_shape_;
 	sf::CircleShape pt_pivot_shape_;
 
+  sf::RectangleShape line_shape_;
+
 	sf::Sound click_sound_;
 
 	std::vector<SwitchAnimation> animations_;
@@ -53,7 +53,23 @@ private:
 	bool paused_;
 	bool started_;
 
+
+  void UpdateLine(float dt, float length);
+
+  bool CheckPointSide(Point& pt);
+
+  void UpdatePoints();
+
+  void UpdatePointSize(sf::RenderWindow& window, sf::View& world_view);
+
+  bool CheckPointSwitches();
+
+  bool SwitchPivot(Point& pt);
+
+  void AnimateSwitches(sf::RenderWindow& window, float circle_radius);
+
 public:
+
 	Windmill(const sf::SoundBuffer & sound_buffer);
 
 	void Start();
@@ -72,26 +88,11 @@ public:
 
 	void TryDelete(sf::Vector2f click_pos);
 
-	void ChangeAngularSpeed(double m_speed);
+	void MultiplyAngularSpeed(double m_speed);
 
 	bool isPivotSet();
+
 	sf::Vector2f getPivotPosition();
-
-private:
-
-	void UpdateLine(float dt, float length);
-
-	bool CheckPointSide(Point & pt);
-
-	void UpdatePoints();
-
-	void UpdatePointSize(sf::RenderWindow & window, sf::View & world_view);
-	
-	bool CheckPointSwitches();
-
-	bool SwitchPivot(Point & pt);
-
-	void AnimateSwitches(sf::RenderWindow & window, float circle_radius);
 
 };
 

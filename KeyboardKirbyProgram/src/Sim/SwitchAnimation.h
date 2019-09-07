@@ -6,6 +6,7 @@ class SwitchAnimation
 {
 private:
 	sf::Vector2f position_;
+
 	float duration_;
 	float thickness_;
 	float initial_radius_;

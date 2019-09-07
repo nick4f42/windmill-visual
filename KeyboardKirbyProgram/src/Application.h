@@ -8,9 +8,9 @@
 class Application
 {
 private:
+
 	static const float kZoomSpeed;
 
-private:
 	sf::RenderWindow render_window_;
 	sf::View world_view_;
 	sf::View gui_view_;
@@ -34,17 +34,16 @@ private:
 	sf::Clock clock_;
 	float dt_;
 
+  void UpdateViews();
+
+  void PollEvents();
+  inline void Update();
+  void Render();
+
 public:
+
 	Application(sf::VideoMode video_mode, const char* title);
 
 	void Run();
-
-private:
-
-	void UpdateViews();
-
-	void PollEvents();
-	void Update();
-	void Render();
 
 };

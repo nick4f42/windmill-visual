@@ -18,26 +18,19 @@ Application::Application(sf::VideoMode video_mode, const char* title)
 {
 	UpdateViews();
 
-#if _DEBUG
-	if (!click_sound_buffer_.loadFromFile("../bin/Win32/Release/res/click.wav"))
-		exit(-1);
-  if (!msg_texture_.loadFromFile("../bin/Win32/Release/res/message_text.png"))
-    exit(-1);
-#else
 	if (!click_sound_buffer_.loadFromFile("res/click.wav"))
 		exit(-1);
   if (!msg_texture_.loadFromFile("res/message_text.png"))
     exit(-1);
-#endif
 
   msg_shape_.setTexture(&msg_texture_);
 
-  hoverbox_shape_.setFillColor(sf::Color(255, 255, 255, 75));
-  hoverbox_shape_.setOutlineColor(sf::Color(210, 210, 210));
-  hoverbox_shape_.setOutlineThickness(2.f);
+  hoverbox_shape_.setFillColor(sf::Color(255, 255, 255, 32));
+  hoverbox_shape_.setOutlineColor(sf::Color(150, 150, 150));
+  hoverbox_shape_.setOutlineThickness(1.0f);
 
-  msg_shape_.setOutlineColor(sf::Color::White);
-  msg_shape_.setOutlineThickness(2.f);
+  msg_shape_.setOutlineColor(sf::Color(220, 220, 200));
+  msg_shape_.setOutlineThickness(1.5f);
 
 	render_window_.setFramerateLimit(120u);
 }
@@ -62,11 +55,14 @@ void Application::Run()
 
 inline void Application::UpdateViews()
 {
-	world_view_.setSize((float)(starting_height_ * render_window_.getSize().x / render_window_.getSize().y),
+  // Set sizes to be correct aspect ratio
+	world_view_.setSize(
+      (float)(starting_height_ * render_window_.getSize().x / render_window_.getSize().y),
 			(float)(starting_height_));
 	gui_view_.setSize(
       (float)(starting_height_ * render_window_.getSize().x / render_window_.getSize().y),
       (float)(starting_height_));
+  // Sets gui center so it fits in top left corner of screen
   gui_view_.setCenter(gui_view_.getSize() / 2.0f);
 }
 
@@ -88,13 +84,14 @@ void Application::PollEvents()
 		{
 			float zoom_amount = kZoomSpeed * e.mouseWheelScroll.delta;
 
+      // Moves view so view zooms "into" mouse position
 			sf::Vector2f view_center = world_view_.getCenter();
 			sf::Vector2f mouse_position = render_window_.mapPixelToCoords(sf::Mouse::getPosition(render_window_), world_view_);
-			world_view_.move(zoom_amount * (mouse_position.x - view_center.x),
-							 zoom_amount * (mouse_position.y - view_center.y));
+			world_view_.move(
+          zoom_amount * (mouse_position.x - view_center.x),
+				  zoom_amount * (mouse_position.y - view_center.y));
 
 			world_view_.zoom(1.0f - zoom_amount);
-
 		}
 		else if (e.type == sf::Event::MouseButtonPressed)
 		{
@@ -109,7 +106,6 @@ void Application::PollEvents()
 					mouse_dragging_ = true;
 					last_click_position_ = render_window_.mapPixelToCoords(sf::Mouse::getPosition(render_window_), world_view_);
 				}
-
 			}
 			else if (e.mouseButton.button == sf::Mouse::Button::Right)
 			{
@@ -120,7 +116,6 @@ void Application::PollEvents()
 				else
 				{
 					windmill_.ChoosePivot(render_window_.mapPixelToCoords(sf::Mouse::getPosition(render_window_), world_view_));
-
 				}
 			}
 		}
@@ -145,7 +140,6 @@ void Application::PollEvents()
             gui_view_);
 
         msg_shown_ = mp.x < 50 && mp.x >= 0 && mp.y < 50 && mp.y >= 0;
-
       }
 		}
 		else if (e.type == sf::Event::KeyPressed)
@@ -171,18 +165,18 @@ void Application::PollEvents()
 			}
 			else if (e.key.code == sf::Keyboard::Left)
 			{
-				windmill_.ChangeAngularSpeed(0.9);
+				windmill_.MultiplyAngularSpeed(0.9);
 			}
 			else if (e.key.code == sf::Keyboard::Right)
 			{
-				windmill_.ChangeAngularSpeed(1.1);
+				windmill_.MultiplyAngularSpeed(1.1);
 			}
 		}
 	}
 }
 
 
-void Application::Update()
+inline void Application::Update()
 {
 	windmill_.Update(dt_, world_view_.getSize().x * 20.0f);
 }
@@ -206,5 +200,3 @@ void Application::Render()
 
 	render_window_.display();
 }
-
-
