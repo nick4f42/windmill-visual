@@ -159,6 +159,19 @@
     <ClInclude Include="src\Sim\Windmill.h" />
     <ClInclude Include="src\Sim\SwitchAnimation.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Dependencies\bin\openal32.dll" />
+    <None Include="Dependencies\bin\sfml-audio-2.dll" />
+    <None Include="Dependencies\bin\sfml-audio-d-2.dll" />
+    <None Include="Dependencies\bin\sfml-graphics-2.dll" />
+    <None Include="Dependencies\bin\sfml-graphics-d-2.dll" />
+    <None Include="Dependencies\bin\sfml-network-2.dll" />
+    <None Include="Dependencies\bin\sfml-network-d-2.dll" />
+    <None Include="Dependencies\bin\sfml-system-2.dll" />
+    <None Include="Dependencies\bin\sfml-system-d-2.dll" />
+    <None Include="Dependencies\bin\sfml-window-2.dll" />
+    <None Include="Dependencies\bin\sfml-window-d-2.dll" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
