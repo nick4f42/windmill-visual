@@ -14,14 +14,36 @@
 
 struct Point
 {
+  static unsigned index_count;
+  static float arrowhead_proportion;
+  static sf::Color arrow_color;
+  static double arrow_angle;
+
 	sf::Vector2f position;
+
+  unsigned index;
+
+  unsigned next_point_index;
+
+  sf::RectangleShape shaft;
+  sf::VertexArray arrowhead;
+
 	bool on_clockwise_side = false;
 	bool on_clockwise_side_before = false;
 
+  Point(sf::Vector2f position = { 100000000.0f, 100000000.0f });
+
+  void DrawArrow(sf::RenderWindow& window, sf::View& world_view, sf::Vector2f& tip_pos);
+
 	bool operator==(Point& other)
 	{
-		return position == other.position;
+    return index == other.index;
 	}
+
+  bool operator!=(Point& other)
+  {
+    return index != other.index;
+  }
 };
 
 class Windmill
@@ -32,8 +54,8 @@ private:
 
 	std::vector<Point> points_;
 	Point current_pivot_;
+	unsigned prev_pivot_index_;
 	bool pivot_set_;
-	Point previous_pivot_;
 	double rad_since_pivot_;
 
 	double current_rad_;
