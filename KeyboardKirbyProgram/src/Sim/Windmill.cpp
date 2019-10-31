@@ -4,57 +4,26 @@
 const double Windmill::default_angular_speed_ = 0.45;
 
 unsigned Point::index_count = 0u;
+
 float Point::arrowhead_proportion = 0.025f;
-sf::Color Point::arrow_color = sf::Color(3, 0, 79);
+
 double Point::arrow_angle = 0.4;
+
+sf::RectangleShape Point::shaft({ 1.f, 1.f });
+
+sf::VertexArray Point::arrowhead(sf::Triangles, 3u);
+
 
 Point::Point(sf::Vector2f position)
   : position(position)
   , index(index_count++)
-  , next_point_index((unsigned)(-1))
-  , shaft({ 1.f, 1.f })
-  , arrowhead(sf::Triangles, 3u)
 {
-  for (int i = 0; i < 3; i++)
-    arrowhead[i].color = arrow_color;
-
   shaft.setOrigin({ 0.0f, 0.5f }); // sets origin to center
-  shaft.setFillColor(arrow_color);
 }
 
-
-void Point::DrawArrow(sf::RenderWindow& window, sf::View& world_view, sf::Vector2f& tip_pos)
+unsigned Point::getIndexCount()
 {
-  float length = sqrt(powf(position.x-tip_pos.x, 2) + 
-                      powf(position.y-tip_pos.y, 2));
-
-  double angle;
-  if (tip_pos.x == position.x)
-    angle = tip_pos.y - position.y > 0 ? M_PI_2 : 3 * M_PI_2;
-  else
-  {
-    angle = atan((tip_pos.y - position.y) / (tip_pos.x - position.x));
-
-    if (tip_pos.x - position.x < 0)
-      angle += M_PI;
-  }
-
-  shaft.setPosition(position);
-
-  shaft.setRotation((float)(angle * 180.0 / M_PI));
-
-  shaft.setScale(length,
-    2.0f * world_view.getSize().y / (float)window.getSize().y);
-
-  arrowhead[0].position = tip_pos;
-
-  arrowhead[1].position = tip_pos - arrowhead_proportion * world_view.getSize().y *
-                sf::Vector2f((float)cos(angle + arrow_angle), (float)sin(angle + arrow_angle));
-  arrowhead[2].position = tip_pos - arrowhead_proportion * world_view.getSize().y *
-                sf::Vector2f((float)cos(angle - arrow_angle), (float)sin(angle - arrow_angle));
-
-  window.draw(arrowhead);
-  window.draw(shaft);
+  return index_count++;
 }
 
 
@@ -68,9 +37,9 @@ Windmill::Windmill(const sf::SoundBuffer& sound_buffer)
 	, rads_per_second_(default_angular_speed_)
 	, pt_proportion_size_(0.005f)
   , line_shape_({ 1.f, 1.f })
-	, started_(false)
 	, click_sound_(sound_buffer)
 	, paused_(false)
+	, started_(false)
 {
 	pt_shape_.setFillColor(sf::Color::Transparent);
 	pt_shape_.setOutlineColor(sf::Color::White);
@@ -97,7 +66,7 @@ void Windmill::Start()
 	UpdatePoints();
 	for (auto point : points_)
 	{
-		point.on_clockwise_side_before = point.on_clockwise_side;
+		point.prev_on_clockwise = point.on_clockwise;
 	}
 	prev_pivot_index_ = current_pivot_.index;
 }
@@ -112,6 +81,7 @@ void Windmill::TogglePause()
 void Windmill::Restart()
 {
 	points_.clear();
+  vectors_.clear();
 	animations_.clear();
 
 	started_ = false;
@@ -189,19 +159,7 @@ void Windmill::Draw(sf::RenderWindow & window, sf::View& world_view)
 	UpdatePointSize(window, world_view);
 
   // Draws the arrow to each next point (if next point is stored)
-  for (auto& pt : points_)
-  {
-    if (pt.next_point_index != (unsigned)(-1))
-    {
-      for (auto& other : points_)
-      {
-        if (pt.next_point_index != other.index)
-          continue;
-
-        pt.DrawArrow(window, world_view, other.position);
-      }
-    }
-  }
+  // ---
 
   if (started_)
   {
@@ -211,6 +169,8 @@ void Windmill::Draw(sf::RenderWindow & window, sf::View& world_view)
 
     window.draw(line_shape_);
   }
+
+  DrawVectors(window, world_view);
 
   // Draw the point circles
 	for (auto& pt : points_)
@@ -238,7 +198,7 @@ void Windmill::AddPoint(sf::Vector2f pos)
 	points_.push_back(Point(pos));
 	if (started_ && pivot_set_)
 	{
-		points_.back().on_clockwise_side = points_.back().on_clockwise_side_before = CheckPointSide(points_.back());
+		points_.back().on_clockwise = points_.back().prev_on_clockwise = CheckPointSide(points_.back());
 	}
 }
 
@@ -254,8 +214,7 @@ bool Windmill::ChoosePivot(sf::Vector2f click_pos)
 			pivot_set_ = true;
 			UpdatePoints();
 
-      for (auto& pt : points_)
-        pt.next_point_index = (unsigned)(-1);
+      vectors_.clear();
 
 			return true;
 		}
@@ -276,6 +235,9 @@ void Windmill::TryDelete(sf::Vector2f click_pos)
 				pivot_set_ = started_ = false;
 
 			points_.erase(it);
+
+      vectors_.clear();
+
 			return;
 		}
 	}
@@ -328,21 +290,10 @@ bool Windmill::CheckPointSide(Point& pt)
 			angle += M_PI * 2;
 	}
 
-	bool clockwise_condition;
-
 	if (angle < M_PI)
-		clockwise_condition = current_rad_ > angle && current_rad_ < angle + M_PI;
+		return current_rad_ > angle && current_rad_ < angle + M_PI;
 	else
-		clockwise_condition = current_rad_ > angle || current_rad_ < angle - M_PI;
-
-	if (clockwise_condition)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+		return current_rad_ > angle || current_rad_ < angle - M_PI;
 }
 
 
@@ -353,12 +304,10 @@ void Windmill::UpdatePoints()
 		if (pt == current_pivot_)
 			continue;
 
-		pt.on_clockwise_side_before = pt.on_clockwise_side;
+		pt.prev_on_clockwise = pt.on_clockwise;
 
-		pt.on_clockwise_side = CheckPointSide(pt);
-		
+		pt.on_clockwise = CheckPointSide(pt);
 	}
-	
 }
 
 
@@ -369,7 +318,7 @@ bool Windmill::CheckPointSwitches()
 		if (pt == current_pivot_)
 			continue;
 
-		if (pt.on_clockwise_side != pt.on_clockwise_side_before)
+		if (pt.on_clockwise != pt.prev_on_clockwise)
 		{
 			if (SwitchPivot(pt))
 				return true;
@@ -385,24 +334,22 @@ bool Windmill::SwitchPivot(Point& pt)
 	if (pt.index == prev_pivot_index_ && rad_since_pivot_ < 0.3f)
 		return false;
 
-  Point* pivot = nullptr;
-  for (auto& other : points_)
+  bool in_vectors_ = false;
+  for (auto& v : vectors_)
   {
-    if (other != current_pivot_)
-      continue;
-
-    pivot = &other;
+    if (v[0] == current_pivot_.position && v[1] == pt.position)
+    {
+      in_vectors_ = true;
+      break;
+    }
   }
+  if (!in_vectors_)
+    vectors_.push_back(std::array<sf::Vector2f, 2>({ current_pivot_.position, pt.position }));
 
-  if (pivot == nullptr)
-    throw("Pivot index not found!");
-
-  pivot->next_point_index = pt.index;
-	prev_pivot_index_ = current_pivot_.index;
-
+  prev_pivot_index_ = current_pivot_.index;
 	current_pivot_ = pt;
 	rad_since_pivot_ = 0;
-	
+
 	return true;
 }
 
@@ -413,5 +360,63 @@ void Windmill::AnimateSwitches(sf::RenderWindow& window, float circle_radius)
 	{
 		anim.Draw(window, circle_radius);
 	}
-	
+}
+
+
+void Windmill::DrawVectors(sf::RenderWindow& window, sf::View& world_view)
+{
+  for (auto it = vectors_.begin(); it != vectors_.end(); it++)
+  {
+    sf::Vector2f tail = (*it)[0], tip = (*it)[1];
+
+    float length = sqrt(powf(tail.x - tip.x, 2) +
+      powf(tail.y - tip.y, 2));
+
+    double angle;
+    if (tip.x == tail.x)
+      angle = tip.y - tail.y > 0 ? M_PI_2 : 3 * M_PI_2;
+    else
+    {
+      angle = atan((tip.y - tail.y) / (tip.x - tail.x));
+
+      if (tip.x - tail.x < 0)
+        angle += M_PI;
+    }
+
+    Point::shaft.setPosition(tail);
+
+    Point::shaft.setRotation((float)(angle * 180.0 / M_PI));
+
+    Point::shaft.setScale(length,
+      2.0f * world_view.getSize().y / (float)window.getSize().y);
+
+    Point::arrowhead[0].position = tip;
+
+    Point::arrowhead[1].position = tip - Point::arrowhead_proportion * world_view.getSize().y *
+      sf::Vector2f((float)cos(angle + Point::arrow_angle), (float)sin(angle + Point::arrow_angle));
+    Point::arrowhead[2].position = tip - Point::arrowhead_proportion * world_view.getSize().y *
+      sf::Vector2f((float)cos(angle - Point::arrow_angle), (float)sin(angle - Point::arrow_angle));
+
+    auto color = getVectorColor((it - vectors_.begin()));
+
+    for (int i = 0; i < 3; i++)
+    {
+      Point::arrowhead[i].position -= (length / 2.0f - 1.5f * Point::arrowhead_proportion * 
+        world_view.getSize().y) * sf::Vector2f((float)cos(angle), (float)sin(angle));
+      Point::arrowhead[i].color = color;
+    }
+    Point::shaft.setFillColor(color);
+
+    window.draw(Point::arrowhead);
+
+    window.draw(Point::shaft);
+  }
+}
+
+
+sf::Color Windmill::getVectorColor(unsigned i)
+{
+  size_t s = vectors_.size();
+  float t = s != 1 ? (float)i / (s-1) : 0;
+  return sf::Color((int)(30 * t), (int)(90 * t), (int)(90 * (1.0f - t)));
 }

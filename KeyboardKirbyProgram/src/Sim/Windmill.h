@@ -14,26 +14,26 @@
 
 struct Point
 {
+private:
+
   static unsigned index_count;
+
+public:
+
   static float arrowhead_proportion;
-  static sf::Color arrow_color;
   static double arrow_angle;
+
+  static sf::RectangleShape shaft;
+  static sf::VertexArray arrowhead;
 
 	sf::Vector2f position;
 
+	bool on_clockwise = false;
+	bool prev_on_clockwise = false;
+
   unsigned index;
 
-  unsigned next_point_index;
-
-  sf::RectangleShape shaft;
-  sf::VertexArray arrowhead;
-
-	bool on_clockwise_side = false;
-	bool on_clockwise_side_before = false;
-
   Point(sf::Vector2f position = { 100000000.0f, 100000000.0f });
-
-  void DrawArrow(sf::RenderWindow& window, sf::View& world_view, sf::Vector2f& tip_pos);
 
 	bool operator==(Point& other)
 	{
@@ -44,6 +44,9 @@ struct Point
   {
     return index != other.index;
   }
+
+  unsigned getIndexCount();
+
 };
 
 class Windmill
@@ -53,8 +56,11 @@ private:
 	static const double default_angular_speed_;
 
 	std::vector<Point> points_;
+  std::vector<std::array<sf::Vector2f, 2>> vectors_;
+
 	Point current_pivot_;
-	unsigned prev_pivot_index_;
+  unsigned prev_pivot_index_;
+
 	bool pivot_set_;
 	double rad_since_pivot_;
 
@@ -89,6 +95,10 @@ private:
   bool SwitchPivot(Point& pt);
 
   void AnimateSwitches(sf::RenderWindow& window, float circle_radius);
+
+  void DrawVectors(sf::RenderWindow& window, sf::View& world_view);
+
+  sf::Color getVectorColor(unsigned i);
 
 public:
 
