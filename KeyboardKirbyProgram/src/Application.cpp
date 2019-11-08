@@ -84,9 +84,15 @@ void Application::PollEvents()
 		{
 			float zoom_amount = kZoomSpeed * e.mouseWheelScroll.delta;
 
+      if (world_view_.getSize().y < 0.1 && zoom_amount > 0 ||
+          world_view_.getSize().y > 10000 && zoom_amount < 0)
+        continue;
+
       // Moves view so view zooms "into" mouse position
 			sf::Vector2f view_center = world_view_.getCenter();
-			sf::Vector2f mouse_position = render_window_.mapPixelToCoords(sf::Mouse::getPosition(render_window_), world_view_);
+			sf::Vector2f mouse_position = render_window_.mapPixelToCoords(
+        sf::Mouse::getPosition(render_window_), world_view_);
+
 			world_view_.move(
           zoom_amount * (mouse_position.x - view_center.x),
 				  zoom_amount * (mouse_position.y - view_center.y));
@@ -159,9 +165,7 @@ void Application::PollEvents()
 			else if (e.key.code == sf::Keyboard::V)
 			{
 				if (windmill_.isPivotSet())
-				{
 					world_view_.setCenter(windmill_.getPivotPosition());
-				}
 			}
 			else if (e.key.code == sf::Keyboard::Left)
 			{

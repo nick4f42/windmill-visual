@@ -5,4 +5,10 @@ An interactive program that demonstrates the Windmill problem on the 2011 IMO, a
 
 ---
 
-The box in the upper lefthand corner will display all keybinds when the cursor is over it.
+## Features
+
+- View that can be dragged / zoomed
+- Creating and deleting points
+- Manually selecting a new pivot point
+- Arrows that show the path that the pivot point takes
+- Putting the cursor over the box on the top left will display all keybinds

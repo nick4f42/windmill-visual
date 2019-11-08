@@ -161,16 +161,18 @@ void Windmill::Draw(sf::RenderWindow & window, sf::View& world_view)
   // Draws the arrow to each next point (if next point is stored)
   // ---
 
+  DrawVectors(window, world_view);
+
   if (started_)
   {
     // sets line very long and 2 pixels thick
-    line_shape_.setScale(world_view.getSize().y * 10.f, 
+    auto diff = world_view.getCenter() - current_pivot_.position;
+    auto dist = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+    line_shape_.setScale(2 * (dist + world_view.getSize().x + world_view.getSize().y),
       2.0f * world_view.getSize().y / (float)window.getSize().y);
 
     window.draw(line_shape_);
   }
-
-  DrawVectors(window, world_view);
 
   // Draw the point circles
 	for (auto& pt : points_)
