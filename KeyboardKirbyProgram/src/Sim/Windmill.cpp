@@ -40,6 +40,7 @@ Windmill::Windmill(const sf::SoundBuffer& sound_buffer)
 	, click_sound_(sound_buffer)
 	, paused_(false)
 	, started_(false)
+  , arrows_shown_(true)
 {
 	pt_shape_.setFillColor(sf::Color::Transparent);
 	pt_shape_.setOutlineColor(sf::Color::White);
@@ -136,9 +137,9 @@ void Windmill::Update(float dt, float length)
 	auto test_finished = std::remove_if(animations_.begin(), 
                                       animations_.end(), 
                                       [](const SwitchAnimation& anim)
-	{
-		return anim.isFinished();
-	});
+	                                    {
+		                                    return anim.isFinished();
+	                                    });
 	animations_.erase(test_finished, animations_.end());
 }
 
@@ -154,14 +155,12 @@ void Windmill::UpdatePointSize(sf::RenderWindow & window, sf::View & world_view)
 }
 
 
-void Windmill::Draw(sf::RenderWindow & window, sf::View& world_view)
+void Windmill::Draw(sf::RenderWindow& window, sf::View& world_view)
 {
 	UpdatePointSize(window, world_view);
 
-  // Draws the arrow to each next point (if next point is stored)
-  // ---
-
-  DrawVectors(window, world_view);
+  if (arrows_shown_)
+    DrawVectors(window, world_view);
 
   if (started_)
   {
@@ -195,6 +194,24 @@ void Windmill::Draw(sf::RenderWindow & window, sf::View& world_view)
 }
 
 
+void Windmill::DrawPausedSymbol(sf::RenderWindow& window, sf::View& gui_view)
+{
+  if (!paused_)
+    return;
+
+  sf::RectangleShape bar(sf::Vector2f(8.0f, 30.0f));
+  bar.setFillColor(sf::Color(220, 200, 200));
+
+  bar.setPosition(gui_view.getSize().x - 28.0f, 20.0f);
+
+  window.draw(bar);
+
+  bar.move(sf::Vector2f(-16.0f, 0.0f));
+
+  window.draw(bar);
+}
+
+
 void Windmill::AddPoint(sf::Vector2f pos)
 {
 	points_.push_back(Point(pos));
@@ -202,6 +219,7 @@ void Windmill::AddPoint(sf::Vector2f pos)
 	{
 		points_.back().on_clockwise = points_.back().prev_on_clockwise = CheckPointSide(points_.back());
 	}
+  vectors_.clear();
 }
 
 
@@ -421,4 +439,10 @@ sf::Color Windmill::getVectorColor(unsigned i)
   size_t s = vectors_.size();
   float t = s != 1 ? (float)i / (s-1) : 0;
   return sf::Color((int)(30 * t), (int)(90 * t), (int)(90 * (1.0f - t)));
+}
+
+
+void Windmill::toggleArrows()
+{
+  arrows_shown_ = !arrows_shown_;
 }

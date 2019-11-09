@@ -149,12 +149,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\GUI.cpp" />
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Sim\Windmill.cpp" />
     <ClCompile Include="src\Sim\SwitchAnimation.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\GUI.h" />
     <ClInclude Include="src\Application.h" />
     <ClInclude Include="src\Sim\Windmill.h" />
     <ClInclude Include="src\Sim\SwitchAnimation.h" />

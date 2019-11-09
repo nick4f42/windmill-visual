@@ -1,9 +1,13 @@
 #pragma once
 
+#include <stdexcept>
+#include <string>
+
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
 #include "Sim/Windmill.h"
+#include "GUI.h"
 
 class Application
 {
@@ -24,10 +28,7 @@ private:
 
 	Windmill windmill_;
 
-  sf::Texture msg_texture_;
-  sf::RectangleShape msg_shape_;
-
-  sf::RectangleShape hoverbox_shape_;
+  GUI gui_;
 
   bool msg_shown_;
 

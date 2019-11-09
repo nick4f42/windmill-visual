@@ -10,29 +10,28 @@ Application::Application(sf::VideoMode video_mode, const char* title)
 	, starting_height_(video_mode.height)
 	, mouse_dragging_(false)
 	, windmill_(click_sound_buffer_)
-  , msg_shape_({ 400, 300 })
-  , hoverbox_shape_({ 30, 30 })
+  , gui_("LClick+Drag  - Move View\n"
+         "Shift+LClick - Create Point\n"
+         "Shift+RClick - Delete Point\n"
+         "RClick       - Select Pivot\n"
+         "\n"
+         "Enter        - Start Windmill\n"
+         "Space        - Play/Pause Windmill\n"
+         "R            - Restart Windmill\n"
+         "L/R Arrows   - Change Speed\n"
+         "A            - Show/Hide Arrows\n"
+         "V            - Reset View/Zoom\n",
+         22u)
   , msg_shown_(false)
 	, clock_()
 	, dt_(0.f)
 {
 	UpdateViews();
 
-	if (!click_sound_buffer_.loadFromFile("res/click.wav"))
-		exit(-1);
-  if (!msg_texture_.loadFromFile("res/message_text.png"))
-    exit(-1);
+  if (!click_sound_buffer_.loadFromFile("res/click.wav"))
+    throw std::runtime_error("Error loading file");
 
-  msg_shape_.setTexture(&msg_texture_);
-
-  hoverbox_shape_.setFillColor(sf::Color(255, 255, 255, 32));
-  hoverbox_shape_.setOutlineColor(sf::Color(150, 150, 150));
-  hoverbox_shape_.setOutlineThickness(1.0f);
-
-  msg_shape_.setOutlineColor(sf::Color(220, 220, 200));
-  msg_shape_.setOutlineThickness(1.5f);
-
-	render_window_.setFramerateLimit(120u);
+	render_window_.setFramerateLimit(0u);
 }
 
 
@@ -78,14 +77,21 @@ void Application::PollEvents()
 		}
 		else if (e.type == sf::Event::Resized)
 		{
-			UpdateViews();
+      if (e.size.width < 600 || e.size.height < 600)
+      {
+        render_window_.setSize({ 600u, 600u });
+      }
+      else
+      {
+			  UpdateViews();
+      }
 		}
 		else if (e.type == sf::Event::MouseWheelScrolled)
 		{
 			float zoom_amount = kZoomSpeed * e.mouseWheelScroll.delta;
 
-      if (world_view_.getSize().y < 0.1 && zoom_amount > 0 ||
-          world_view_.getSize().y > 10000 && zoom_amount < 0)
+      if (world_view_.getSize().y < 0.05 && zoom_amount > 0 ||
+          world_view_.getSize().y > 50000 && zoom_amount < 0)
         continue;
 
       // Moves view so view zooms "into" mouse position
@@ -154,7 +160,7 @@ void Application::PollEvents()
 			{
 				windmill_.Start();
 			}
-			else if (e.key.code == sf::Keyboard::P)
+			else if (e.key.code == sf::Keyboard::Space)
 			{
 				windmill_.TogglePause();
 			}
@@ -166,6 +172,11 @@ void Application::PollEvents()
 			{
 				if (windmill_.isPivotSet())
 					world_view_.setCenter(windmill_.getPivotPosition());
+
+
+        float new_width = (float)starting_height_ * (float)render_window_.getSize().x / render_window_.getSize().y;
+
+        world_view_.setSize(sf::Vector2f(new_width, (float)starting_height_));
 			}
 			else if (e.key.code == sf::Keyboard::Left)
 			{
@@ -175,6 +186,10 @@ void Application::PollEvents()
 			{
 				windmill_.MultiplyAngularSpeed(1.1);
 			}
+      else if (e.key.code == sf::Keyboard::A)
+      {
+        windmill_.toggleArrows();
+      }
 		}
 	}
 }
@@ -197,10 +212,9 @@ void Application::Render()
   // Gui's View
   render_window_.setView(gui_view_);
 
-  if (msg_shown_)
-    render_window_.draw(msg_shape_);
-  else
-    render_window_.draw(hoverbox_shape_);
+  gui_.Draw(render_window_, gui_view_, msg_shown_);
+
+  windmill_.DrawPausedSymbol(render_window_, gui_view_);
 
 	render_window_.display();
 }

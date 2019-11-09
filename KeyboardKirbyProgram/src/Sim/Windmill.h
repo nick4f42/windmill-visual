@@ -81,6 +81,8 @@ private:
 	bool paused_;
 	bool started_;
 
+  bool arrows_shown_;
+
 
   void UpdateLine(float dt, float length);
 
@@ -101,8 +103,8 @@ private:
   sf::Color getVectorColor(unsigned i);
 
 public:
-
-	Windmill(const sf::SoundBuffer & sound_buffer);
+  
+	Windmill(const sf::SoundBuffer& sound_buffer);
 
 	void Start();
 
@@ -112,7 +114,9 @@ public:
 
 	void Update(float dt, float length);
 
-	void Draw(sf::RenderWindow & window, sf::View & world_view);
+	void Draw(sf::RenderWindow& window, sf::View& world_view);
+
+  void DrawPausedSymbol(sf::RenderWindow& window, sf::View& gui_view);
 
 	void AddPoint(sf::Vector2f pos);
 
@@ -125,6 +129,8 @@ public:
 	bool isPivotSet();
 
 	sf::Vector2f getPivotPosition();
+
+  void toggleArrows();
 
 };
 
