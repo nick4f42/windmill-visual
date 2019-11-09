@@ -31,7 +31,7 @@ Application::Application(sf::VideoMode video_mode, const char* title)
   if (!click_sound_buffer_.loadFromFile("res/click.wav"))
     throw std::runtime_error("Error loading file");
 
-	render_window_.setFramerateLimit(0u);
+	render_window_.setFramerateLimit(300u);
 }
 
 
