@@ -21,9 +21,9 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{9EED48FD-05E5-4A11-ABC3-03C451AD7E42}</ProjectGuid>
-    <RootNamespace>KeyboardKirbyProgram</RootNamespace>
+    <RootNamespace>WindmillVisual</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>KeyboardKirbyProgram</ProjectName>
+    <ProjectName>WindmillVisual</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
