@@ -1,5 +1,5 @@
 # Windmill Interactive Visual
-An interactive program that demonstrates the Windmill problem on the 2011 IMO, allowing the user to place points, choose a starting pivot point, and watch as the line sweeps through the points.
+An interactive program that demonstrates the ["windmill" problem](https://artofproblemsolving.com/wiki/index.php?title=2011_IMO_Problems/Problem_2) on the 2011 IMO (problem 2), allowing the user to place points, choose a starting pivot point, and watch as the line sweeps through the points.
 
 [This 3Blue1Brown video](https://youtu.be/M64HUIJFTZM) served as inspiration for this project and brilliantly explains the problem and solution.
 
